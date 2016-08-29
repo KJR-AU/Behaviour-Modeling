@@ -1,0 +1,1 @@
+Application.alert("Hello, world!")
