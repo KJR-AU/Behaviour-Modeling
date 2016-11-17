@@ -8,6 +8,7 @@ import pickle
 import sys
 sys.path.append("/Library/Python/2.7/site-packages")
 from javax.swing import Box, BoxLayout, JLabel, JCheckBox, JComboBox, JTextField
+#from ASTutils import updateLineNumbers
 
 #get selected nodes
 count=0
@@ -54,9 +55,10 @@ for key,value in feature.items():
       #elif (featurekey == 'children'):
         if (featurekey == 'children'):
             for child in featurevalue:
-            #for tag in child['tags']:
-                #print tag['location']['line'], tag['name']
-            #   output[tag['location']['line']] = tag['name']
+                if ('tags' in child):
+                    for tag in child['tags']:
+                        #print tag['location']['line'], tag['name']
+                        output[tag['location']['line']] = tag['name']
                 if child['type'] == 'Background':
                     #print 'Background'
                     output[child['location']['line']] = 'Background: '

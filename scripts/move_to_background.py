@@ -9,8 +9,46 @@
 import os
 import pickle
 import sys
+
+
+def updateLineNumbers(feature,offset,increment):
+    for key,value in feature['feature'].items():
+        if (key == 'children'):
+            for child in value:
+                print "Child:", child
+                if child['type'] == 'Scenario':
+                    if child['location']['line'] >= offset:
+                        child['location']['line'] = child['location']['line'] + increment
+                if child['type'] == 'Scenario Outline':
+                    if child['location']['line'] >= offset:
+                        child['location']['line'] = child['location']['line'] + increment
+                if child['type'] != 'Background':  # we don't want to update the Background we just created
+                    if ('steps' in child):
+                        for step in child['steps']:
+                            if step['location']['line'] >= offset:
+                                step['location']['line'] = step['location']['line'] + increment
+                                print "moved ", step['text'], "to ", step['location']['line']
+                    if ('tags' in child):
+                        for tag in child['tags']:
+                            if tag['location']['line'] >= offset:
+                                tag['location']['line'] = tag['location']['line'] + increment
+                                print "moved ", tag['name'],  "to ", tag['location']['line']
+        elif (key == 'tags'):
+            for tag in value:
+                if tag['location']['line'] >= offset:
+                    tag['location']['line'] = tag['location']['line'] + increment
+                    print "moved ", tag['text'], "to ", tag['location']['line']
+    for comment in feature['comments']:
+        if comment['location']['line'] >= offset:
+            comment['location']['line'] = comment['location']['line'] + increment
+            print "moved ", comment['text'], "to ", comment['location']['line']
+
+
+
+
 sys.path.append("/Library/Python/2.7/site-packages")
-from javax.swing import Box, BoxLayout, JLabel, JCheckBox, JComboBox, JTextField
+#from javax.swing import Box, BoxLayout, JLabel, JCheckBox, JComboBox, JTextField
+#from ASTutils import updateLineNumbers
 
 document.orientation = Application.ORIENTATION_TOP_TO_BOTTOM
 document.bias = Application.BIAS_START
@@ -68,27 +106,39 @@ for ge in document.selection:
                 #insert the step into the background
                 if backgroundExists:
                     #update the line location of the new background clause and then append to background AST entry
+                    child['steps'].remove(newBackgroundItem)
+                    print "removed step:", newBackgroundItem
+                    print "Length of background: ", len(feature['feature']['children'][backgroundIndex]['steps'])
                     newBackgroundItem['location']['line']= feature['feature']['children'][backgroundIndex]['location']['line'] + len(feature['feature']['children'][backgroundIndex]['steps']) + 1
                     feature['feature']['children'][backgroundIndex]['steps'].append(newBackgroundItem)
                     print "appended background:", feature['feature']['children'][backgroundIndex]
                     #make newBackgroundItem node a child of the Background group
                     backgroundGroup = document.find("Background", None)[0]
                     document.modifyAttribute([ge],"parent",backgroundGroup)
+                    print "Offset: ", newBackgroundItem['location']['line']
+                    updateLineNumbers(feature,newBackgroundItem['location']['line']+1,1)
                     #update all locations
                     #iterate through AST, incrementing all location lines after the insert point by 1
                 else:
                     print "Creating Background"
                     #find location of end of Feature description
                     #create new Background AST entry
-                    newBackground={'steps': [], 'keyword': u'Background', 'type': 'Background', 'location': {'column': 1, 'line': 5}, 'name': u''}
+                    #need to fix the offset to be the end of the description, not just the second line of the file
+                    newBackground={'steps': [], 'keyword': u'Background', 'type': 'Background', 'location': {'column': 1, 'line': 2}, 'name': u''}
                     backgroundIndex=0
                     #update the line location of the new background clause and then append to background AST entry
                     #newBackgroundItem['location']['line'] = feature['feature']['children'][backgroundIndex]['location']['line'] + len(feature['feature']['children'][backgroundIndex]['steps']) + 1
                     #insert Background after the Feature heading
                     #feature['feature']['children'].insert(backgroundIndex,newBackgroundItem)
                     feature['feature']['children'].insert(backgroundIndex,newBackground)
+
+                    #remove original step from scenario
+                    child['steps'].remove(newBackgroundItem)
+                    print "removed step:", newBackgroundItem
                     #adjust step location and add steps to new Background
+                    print "Length of background: ", len(feature['feature']['children'][backgroundIndex]['steps'])
                     newBackgroundItem['location']['line']= feature['feature']['children'][backgroundIndex]['location']['line'] + len(feature['feature']['children'][backgroundIndex]['steps']) + 1
+                    newBackgroundItem['location']['line']= feature['feature']['children'][backgroundIndex]['location']['line'] + 1
                     feature['feature']['children'][backgroundIndex]['steps'].append(newBackgroundItem)
                     print "appended background:", feature['feature']['children'][backgroundIndex]
                     #create Background group in the graph
@@ -101,6 +151,10 @@ for ge in document.selection:
                     document.modifyAttribute([ge],"parent",backgroundGroup)
                     #update all locations
                     #iterate through AST, incrementing all location lines after the insert point by 2
+                    #need to fix the offset to be the end of the description, not just the second line of the file
+                    #print "Offset: ", feature['feature']['children'][backgroundIndex]['location']['line']+len(feature['feature']['children'][backgroundIndex]['steps'])
+                    #updateLineNumbers(feature,feature['feature']['children'][backgroundIndex]['location']['line']+len(feature['feature']['children'][backgroundIndex]['steps'])+1,2)
+                    updateLineNumbers(feature,2,2)
                 current_child = current_child +1
 
         #update pickled AST
