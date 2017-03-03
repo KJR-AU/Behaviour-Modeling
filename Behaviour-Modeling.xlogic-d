@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain majorVersion="4" minorVersion="0">
+    <attributes>
+        <attribute class="java.lang.String" key="name">Behaviour-Modeling</attribute>
+        <attribute class="java.lang.Boolean" key="builtIn">false</attribute>
+        <attribute class="java.lang.Boolean" key="hidden">false</attribute>
+    </attributes>
+    <entityClass>
+        <attributes>
+            <attribute class="java.util.UUID" key="uuid">ed7e6ad9-9348-4499-8672-44b2f9bc0d60</attribute>
+            <attribute class="java.lang.String" key="name">Given</attribute>
+            <attribute class="com.arciem.graphics.ColorRGB" key="color">
+                <colorRGB blue="1.0" green="0.0" red="0.0"/>
+            </attribute>
+            <attribute class="java.lang.Double" key="edgeWeight">1.0</attribute>
+            <attribute class="java.lang.Boolean" key="milestone">false</attribute>
+            <attribute class="java.lang.Boolean" key="builtIn">false</attribute>
+            <attribute class="java.lang.String" key="assignment">ResourceAssignment.fixedeffort</attribute>
+        </attributes>
+    </entityClass>
+    <entityClass>
+        <attributes>
+            <attribute class="java.util.UUID" key="uuid">76d5c769-b448-4214-81f2-51e7a7219192</attribute>
+            <attribute class="java.lang.String" key="name">When</attribute>
+            <attribute class="com.arciem.graphics.ColorRGB" key="color">
+                <colorRGB blue="1.0" green="0.0" red="1.0"/>
+            </attribute>
+            <attribute class="java.lang.Double" key="edgeWeight">1.0</attribute>
+            <attribute class="java.lang.Boolean" key="milestone">false</attribute>
+            <attribute class="java.lang.Boolean" key="builtIn">false</attribute>
+            <attribute class="java.lang.String" key="assignment">ResourceAssignment.fixedeffort</attribute>
+        </attributes>
+    </entityClass>
+    <entityClass>
+        <attributes>
+            <attribute class="java.util.UUID" key="uuid">b30880cf-996a-47e6-bbf7-38c7a088c423</attribute>
+            <attribute class="java.lang.String" key="name">And</attribute>
+            <attribute class="com.arciem.graphics.ColorRGB" key="color">
+                <colorRGB blue="0.800000011920929" green="0.800000011920929" red="0.800000011920929"/>
+            </attribute>
+            <attribute class="java.lang.Double" key="edgeWeight">1.0</attribute>
+            <attribute class="java.lang.Boolean" key="milestone">false</attribute>
+            <attribute class="java.lang.Boolean" key="builtIn">false</attribute>
+            <attribute class="java.lang.String" key="assignment">ResourceAssignment.fixedeffort</attribute>
+        </attributes>
+    </entityClass>
+    <entityClass>
+        <attributes>
+            <attribute class="java.util.UUID" key="uuid">35fdeaeb-bec9-4e4d-bfd5-bcb53988ad17</attribute>
+            <attribute class="java.lang.String" key="name">Then</attribute>
+            <attribute class="com.arciem.graphics.ColorRGB" key="color">
+                <colorRGB blue="0.0" green="0.49803921580314636" red="1.0"/>
+            </attribute>
+            <attribute class="java.lang.Double" key="edgeWeight">1.0</attribute>
+            <attribute class="java.lang.Boolean" key="milestone">false</attribute>
+            <attribute class="java.lang.Boolean" key="builtIn">false</attribute>
+            <attribute class="java.lang.String" key="assignment">ResourceAssignment.fixedeffort</attribute>
+        </attributes>
+    </entityClass>
+</domain>
