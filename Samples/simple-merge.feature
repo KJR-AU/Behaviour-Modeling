@@ -1,6 +1,5 @@
 Feature: login
 
-
 @Test
 Scenario: Display an error message when login with invalid credentials 
 Given User is on login page

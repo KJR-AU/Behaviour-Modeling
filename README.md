@@ -7,7 +7,10 @@ Works with Flying Logic - use the Edit menu to run one of the scripts below:
 Currently working on scripts:
 
 * **import_feature_file.py**: 
-  ingests a Gherkin feature file and generates a graphical display of each clause, as well as saving the Abstract Syntax Tree as a pickled python object.
+  Ingests a Gherkin feature file and generates a graphical display of each clause.
+
+* **regenerate_feature.py**: 
+  Outputs an updated feature file reflecting the contents of of the Flying Logic document. 
 
 * **merge_nodes.py**: 
   merges selected nodes in the graph and update the AST as a pickled python object. Merged nodes are changed to comments.
@@ -15,8 +18,6 @@ Currently working on scripts:
 * **move_to_background.py**: 
   moves the selected node from within a Scenario into the Background 
 
-* **regenerate_feature.py**: 
-  outputs an updated feature file (i.e. overwrites the original!), reflecting the status of the current Abstract Syntax Tree. 
 
 ## TODO
 
@@ -39,8 +40,12 @@ Tested with:
   
 Development also requires:
   * 'behave' package for running tests.
+  * 'pprint' package for formatting debug messages.
   
 ## References
 
-- Scripting Guide for Flying Logic (PDF)
-  <http://flyinglogic.com/docs/Flying Logic Scripting Guide.pdf>
+- [Scripting Guide for Flying Logic (PDF)](http://flyinglogic.com/docs/Flying+Logic+Scripting+Guide.pdf)
+- [Cucumber Reference Material](https://cucumber.io/docs/reference)
+- [Gherkin Reference Material](https://github.com/cucumber/gherkin)
+  
+
