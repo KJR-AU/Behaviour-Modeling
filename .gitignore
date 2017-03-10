@@ -1,0 +1,6 @@
+**.pickle
+**.DS_Store
+/.idea
+Samples/temp.feature
+**$py.class
+**.pyc

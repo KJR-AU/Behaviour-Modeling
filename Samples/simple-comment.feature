@@ -1,9 +1,5 @@
 Feature: login
 
-
-
-
-
 @Test1
 Scenario: Display an error message when login with invalid credentials
 Given User is on login page
@@ -16,21 +12,4 @@ Scenario: User successfully login with valid credentials
 Given User is on login page
 When User enters valid username and password
 Then User is logged in
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
