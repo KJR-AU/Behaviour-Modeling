@@ -77,7 +77,7 @@ document.modifyUserAttribute([newFeature], "type", 'Feature')
 newFeature.color = Color.GREEN
 capture_tags(newFeature, feature['feature'])
 
-utils.debug("Feature File AST as produced by parser", pprint=feature)
+#utils.debug("Feature File AST as produced by parser", pprint=feature)
 
 for key, value in feature['feature'].items():
     currentScenario = None
@@ -90,14 +90,14 @@ for key, value in feature['feature'].items():
     first_in_scenario = False
     last_background_node = None
 
-    utils.debug(key, value, '\n')
+    #utils.debug(key, value, '\n')
     if key == 'name':
         newFeature.title = value
     if key == 'children':
-        utils.debug(value)
+        #utils.debug(value)
         for child in value:
             if child['type'] == 'Background':
-                utils.debug('Starting', child['type'])
+                #utils.debug('Starting', child['type'])
                 in_background = True
                 newBackground = document.newGroup(None)[0]
                 newBackground.title = 'Background'
@@ -105,7 +105,7 @@ for key, value in feature['feature'].items():
                 set_user_attributes(newBackground, child)
                 currentBackground = newBackground
             elif child['type'] == 'Scenario' or child['type'] == 'ScenarioOutline':
-                utils.debug('Starting', child['type'], child['name'])
+                #utils.debug('Starting', child['type'], child['name'])
                 in_background = False
                 first_in_scenario = True
                 newClass = document.getEntityClassByName('Given')
@@ -118,7 +118,7 @@ for key, value in feature['feature'].items():
                 capture_tags(newScenario, child)
 
             for step in child['steps']:
-                utils.debug("starting step", step['keyword'])
+                #utils.debug("starting step", step['keyword'])
                 if step['keyword'] == u'Given ':
                     newClass = document.getEntityClassByName('Given')
                 elif step['keyword'] == u'When ':
@@ -146,7 +146,7 @@ for key, value in feature['feature'].items():
                 # while processing the background
                 # associate the current element (first in a scenario)
                 # with the last background node
-                utils.debug("in_background = ", in_background)
+                #utils.debug("in_background = ", in_background)
                 if in_background:
                     last_background_node = currentNode
                 elif first_in_scenario:

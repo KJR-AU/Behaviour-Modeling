@@ -7,7 +7,7 @@
 # separate feature to promote a node to the background
 
 import os
-import pickle
+#import pickle
 import sys
 
 sys.path.append("/Library/Python/2.7/site-packages")
@@ -33,13 +33,13 @@ for ge in document.selection:
         if count == 0:
             root_node = ge
             # get the filename of the feature for this node
-            featureFileName = ge.user['filename']
+            featureFileName = ((ge.parent).parent).user['filename']
             baseName = os.path.basename(featureFileName)
-            dirName = os.path.dirname(featureFileName)
-            pickleBaseName = os.path.splitext(baseName)[0] + '.pickle'
-            pickleFilePath = os.path.join(dirName, pickleBaseName)
+            #dirName = os.path.dirname(featureFileName)
+            #pickleBaseName = os.path.splitext(baseName)[0] + '.pickle'
+            #pickleFilePath = os.path.join(dirName, pickleBaseName)
             # load the pickled AST for this feature
-            feature = pickle.load(open(pickleFilePath, "rb"))
+            #feature = pickle.load(open(pickleFilePath, "rb"))
             from_feature = baseName
             # print 'Before', feature, '\n\n'
             # print 'Comments', feature['comments']
@@ -50,40 +50,23 @@ for ge in document.selection:
             if linked[0].entityClass == "Given":
                 from_node = linked[1]
                 to_node = linked[0]
-                from_feature = baseName  # update the baseName
+                to_feature = from_feature
+                from_feature = os.path.basename(((ge.parent).parent).user['filename'])# update the baseName
+                document.modifyUserAttribute([to_node],"links_to",from_feature)
+                document.modifyUserAttribute([from_node],"links_to",to_feature)
+                document.connect(from_node, to_node)
             else:
                 from_node = linked[0]
                 to_node = linked[1]
+                to_feature = os.path.basename(((ge.parent).parent).user['filename'])
+                document.modifyUserAttribute([to_node],"links_to",from_feature)
+                document.modifyUserAttribute([from_node],"links_to",to_feature)
+                document.connect(from_node, to_node)
             # find the matching AST node in the feature
             # where the AST node matches on the location line
             # print feature['feature']['children'], '\n\n'
-            for key, value in feature['feature'].items():
-                if (key == 'children'):
-                    for child in value:
-                        for step in child['steps']:
-                            # print step
-                            if step['location']['line'] == to_node.user['line']:
-                                # print "AST node:", step['text']
-                                # print "Graph Element:", ge.title
-                                # change the new item type to Comment
-                                newComment = step
-                                newComment['type'] = 'Comment'
-                                # update the text to include the Keyword
-                                newComment['text'] = '#' + "links to " + from_feature + ": " + from_node.title
-                                newComment['location']['column'] = len(step['text']) + 6
-                                # print(newComment)
-                                # insert the new item in the Comments section of the AST
-                                feature['comments'].append(newComment)
 
-                    # update pickled AST
-                    # print 'After', feature
-                    # enable one level of undo for merge
-                    # if pickleFilPath exists, rename pickleFilePath to os.path.splitext(baseName)[0] + '.1'
-                    with open(pickleFilePath, 'w') as pickleHandle:
-                        pickle.dump(feature, pickleHandle)
-
-                    # link the two nodes in the graph
-                    document.connect(from_node, to_node)
+        # link the two nodes in the graph
         count = count + 1
 # print linked
 # document.clearSelection()
