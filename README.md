@@ -44,7 +44,7 @@ Development also requires:
   
 ## References
 
-- [Scripting Guide for Flying Logic (PDF)](http://flyinglogic.com/docs/Flying+Logic+Scripting+Guide.pdf)
+- [Scripting Guide for Flying Logic (PDF)](http://flyinglogic.com/docs/Flying%20Logic%20Scripting%20Guide.pdf)
 - [Cucumber Reference Material](https://cucumber.io/docs/reference)
 - [Gherkin Reference Material](https://github.com/cucumber/gherkin)
   
