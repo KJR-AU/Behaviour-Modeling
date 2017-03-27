@@ -1,54 +1,28 @@
 # move selected node to background
-
-# TODO
-# load ast for the feature in which nodes are being merged
-# within the AST, change the merged nodes to comments
-# regenerate the feature file (maybe this is done on demand in another script)
-# separate feature to promote a node to the background
-
-import os
-#import pickle
+#
+from __future__ import print_function
 import sys
 
-#set debug mode
-#debug = false
+# START COMMON BLOCK
+#   Flying Logic sys.path is preserved between script runs do not need to keep adding it every time.
+#   although it is possible that the utils script has been changed so may require a reload
+reload_needed = False
+if 'scriptParentDirectory' in globals():
+    if scriptParentDirectory not in sys.path:
+        sys.path.append("/Library/Python/2.7/site-packages")
+        sys.path.append(scriptParentDirectory)
+    else:
+        # TODO: better detection, reload only necessary when actively editing the utils.py
+        reload_needed = True
 
-def updateLineNumbers(feature, offset, increment):
-    for key, value in feature['feature'].items():
-        if (key == 'children'):
-            for child in value:
-                if debug:
-                    print "Child:", child
-                if child['type'] == 'Scenario':
-                    if child['location']['line'] >= offset:
-                        child['location']['line'] = child['location']['line'] + increment
-                if child['type'] == 'Scenario Outline':
-                    if child['location']['line'] >= offset:
-                        child['location']['line'] = child['location']['line'] + increment
-                if child['type'] != 'Background':  # we don't want to update the Background we just created
-                    if ('steps' in child):
-                        for step in child['steps']:
-                            if step['location']['line'] >= offset:
-                                step['location']['line'] = step['location']['line'] + increment
-                                if debug:
-                                    print "moved ", step['text'], "to ", step['location']['line']
-                    if ('tags' in child):
-                        for tag in child['tags']:
-                            if tag['location']['line'] >= offset:
-                                tag['location']['line'] = tag['location']['line'] + increment
-                                if debug:
-                                    print "moved ", tag['name'], "to ", tag['location']['line']
-        elif (key == 'tags'):
-            for tag in value:
-                if tag['location']['line'] >= offset:
-                    tag['location']['line'] = tag['location']['line'] + increment
-                    if debug:
-                        print "moved ", tag['text'], "to ", tag['location']['line']
-    for comment in feature['comments']:
-        if comment['location']['line'] >= offset:
-            comment['location']['line'] = comment['location']['line'] + increment
-            if debug:
-                print "moved ", comment['text'], "to ", comment['location']['line']
+# noinspection PyPep8
+import utils
+
+if reload_needed:
+    reload(utils)
+# END COMMON BLOCK
+
+
 
 
 sys.path.append("/Library/Python/2.7/site-packages")
@@ -62,28 +36,58 @@ document.addEntityAsSuccessor = True
 # get selected nodes
 count = 0
 merged = []
+
 # iterate through the selection - keep first node and remove all others, transferring edges to the first node
 # print 'selected:', len(document.selection)
 if len(document.selection) < 1:
     Application.alert('You must select at least one node to move into the background.')
 
-featureFileName = None
-feature = None
-
+# TODO: sort document.selection based order
+#       so multiple nodes can be moved from the same scenario
 for ge in document.selection:
+    # TODO: Fix assumption that element selected is a node (given/when/then) inside a scenario
+    #       and work up the parents to find the scenario and then the feature
+
+    scenarioGroup = ge.parent
+    if (scenarioGroup is None or scenarioGroup.user["type"] != 'Scenario'):
+        # Application.alert('Ignoring Invalid Selection.')
+        continue
+
+    featureGroup = scenarioGroup.parent
+    if (featureGroup is None or featureGroup.user["type"] != 'Feature'):
+        # Application.alert('Ignoring Invalid Selection.')
+        continue
+
     if ge.isEntity:
-        if count == 0:
-            root_node = ge
-            backgroundGroup = document.find("Background", None)
-            if backgroundGroup : #check that background group node exists
-                    document.modifyAttribute([ge], "parent", backgroundGroup[0])
+        valid = True
+        # confirm it is the first child of the parent group
+        # ie no edges from within the same group
+        for elem in document.all:
+            if elem.isEdge:
+                src = elem.source
+                tgt = elem.target
+                if src.isEntity and tgt.isEntity:
+                    if tgt == ge and src.parent == scenarioGroup:
+                        valid = False
+                        break
+
+        if valid:
+            backgroundGroup = None
+            backgroundGroups = document.find("Background", None)
+            if backgroundGroups:  # check that background group node exists
+                for candidate in backgroundGroups:
+                    if featureGroup == candidate.parent:
+                        backgroundGroup = candidate
+                        break
             else:
-                    backgroundGroup = document.newGroup(None)[0]  # no need to clearSelection each iteration
-                    backgroundGroup.title = 'Background'
-                    featureGroup = (ge.parent).parent
-                    document.modifyAttribute([backgroundGroup], "parent", featureGroup)
-                    document.modifyUserAttribute([backgroundGroup], "type", 'Background')
-                    # make newBackgroundItem node a child of the Background group
-                    document.modifyAttribute([ge], "parent", backgroundGroup)
-#print feature
+                backgroundGroup = document.newGroup(None)[0]
+                backgroundGroup.title = 'Background'
+                document.modifyAttribute([backgroundGroup], "parent", featureGroup)
+                document.modifyUserAttribute([backgroundGroup], "type", 'Background')
+
+            document.modifyAttribute([ge], "parent", backgroundGroup)
+        else:
+            Application.alert('You must select node(s) at the top of the scenario.')
+            break
+
 document.clearSelection()

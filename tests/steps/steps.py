@@ -79,6 +79,7 @@ def run_script(context, scriptname):
     scriptname = "scripts/" + scriptname + ".py"
 
     exec (compile(open(scriptname, "rb").read(), scriptname, 'exec'), {
+        'scriptParentDirectory': "scripts",
         'document': fl_document,
         'Application': fl_app,
         'Color': Color(),
@@ -140,13 +141,13 @@ def nodes_are_connected(context):
                 "type": row['node'],
                 "title": row['title']
             })
-            assert top is not None, "Cannot find node"
+            assert top is not None, "Cannot find %s node %s" % (row['node'], row['title'])
         else:
             next_node = find_by(g.children, {
                 "type": row['node'],
                 "title": row['title']
             })
-            assert next_node is not None, "Cannot find node %s %s" % (row['node'], row['title'])
+            assert next_node is not None, "Cannot find %s node %s" % (row['node'], row['title'])
             assert next_node in map((lambda x: x.target), top.links), "Node (%s) is not linked by: %s" % (next_node, top.links)
             top = next_node
 
@@ -179,3 +180,30 @@ def step_impl(context):
         assert x.startswith(" "), out
 
     print("Files are the same")
+
+
+@when("I deselect all nodes")
+def clear_selection(context):
+    global fl_document
+    fl_document.clearSelction()
+
+
+@when("I select the node")
+@when("I select the node:")
+@when("I select the nodes")
+@when("I select the nodes:")
+def select_nodes(context):
+    """
+     | group title | node | title |
+    """
+    global fl_document
+
+    for row in context.table:
+        g = find_by(fl_document.stub_groups, {"title": row['group title']})
+        assert g is not None, "Cannot find Group %s" % row['group title']
+        top = find_by(g.children, {
+            "type": row['node'],
+            "title": row['title']
+        })
+        assert top is not None, "Cannot find %s node %s" % (row['node'], row['title'])
+        fl_document.selection.append(top)
