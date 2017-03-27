@@ -79,6 +79,8 @@ capture_tags(newFeature, feature['feature'])
 
 #utils.debug("Feature File AST as produced by parser", pprint=feature)
 
+interFeatureLinks = []
+
 for key, value in feature['feature'].items():
     currentScenario = None
     currentNode = None
@@ -93,7 +95,12 @@ for key, value in feature['feature'].items():
     #utils.debug(key, value, '\n')
     if key == 'name':
         newFeature.title = value
-    if key == 'children':
+    elif key == 'description':
+        # a comment - if it can be decoded it is an inter-feature link, save for recreation
+        decoded = utils.decode_inter_feature_link(value)
+        if decoded:
+            interFeatureLinks.append(decoded)
+    elif key == 'children':
         #utils.debug(value)
         for child in value:
             if child['type'] == 'Background':
@@ -153,3 +160,32 @@ for key, value in feature['feature'].items():
                     if last_background_node is not None:
                         document.connect(last_background_node, currentNode)
                     first_in_scenario = False
+
+# create a catalogue of all the entities in the document tagged with feature/scenario/keyword/text
+catalogue = []
+for elem in document.all:
+    if elem.isGroup and elem.color == Color.GREEN:
+        feature = elem.title
+        for child in elem.children:
+            if child.isGroup:
+                scenario = child.title
+                for step in child.children:
+                    if step.isEntity:
+                        keyword = step.user["keyword"]
+                        text = step.title
+                        entity = {'entity': step, 'feature': feature, 'scenario': scenario, 'keyword': keyword, 'text': text}
+                        catalogue.append(entity)
+    
+# recreate inter-feature link provided both features exist
+for link in interFeatureLinks:
+    src = {}
+    tgt = {}
+    for entity in catalogue:
+        if (link['from_feature'] == entity['feature'] and link['from_scenario'] == entity['scenario'] and link['from_keyword'] == entity['keyword'] and link['from_text'] == entity['text']):
+            src = entity
+        elif (link['to_feature'] == entity['feature'] and link['to_scenario'] == entity['scenario'] and link['to_keyword'] == entity['keyword'] and link['to_text'] == entity['text']):
+            tgt = entity
+    if src and tgt:
+        document.connect(src['entity'], tgt['entity'])
+    
+ 

@@ -3,6 +3,7 @@ from __future__ import print_function
 import sys
 import os
 from pprint import pformat
+import re
 
 __all__ = ['nodes_by_path', '_DEBUG', 'reverse_paths', 'write_gherkin_to_file', 'debug']
 
@@ -184,3 +185,37 @@ def reverse_paths(edges, all_nodes=set()):
                 rev[v] = [k]
     # print(pformat(edges),"=>",pformat(rev))
     return rev
+
+def decode_inter_feature_link(linkString):
+    decodedLink = {}
+    
+    matchObj = re.search( '<<InterFeatureLink FROM FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> TO FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> >>', linkString)
+
+    if matchObj:
+        decodedLink = {
+            'from_feature': matchObj.group(1),
+            'from_scenario': matchObj.group(2),
+            'from_keyword': matchObj.group(3),
+            'from_text': matchObj.group(4),
+            'to_feature': matchObj.group(5),
+            'to_scenario': matchObj.group(6),
+            'to_keyword': matchObj.group(7),
+            'to_text': matchObj.group(8)
+        }
+    return decodedLink
+
+def encode_inter_feature_link(from_feature, from_scenario, from_keyword, from_text, to_feature, to_scenario, to_keyword, to_text):
+    encodedLinkString = "<<InterFeatureLink "
+    encodedLinkString += "FROM "
+    encodedLinkString += "FEATURE" + "<" + from_feature +"> "
+    encodedLinkString += "SCENARIO" + "<" + from_scenario +"> "
+    encodedLinkString += "KEYWORD" + "<" + from_keyword +"> "
+    encodedLinkString += "TEXT" + "<" + from_text +"> "
+    encodedLinkString += "TO "
+    encodedLinkString += "FEATURE" + "<" + to_feature +"> "
+    encodedLinkString += "SCENARIO" + "<" + to_scenario +"> "
+    encodedLinkString += "KEYWORD" + "<" + to_keyword +"> "
+    encodedLinkString += "TEXT" + "<" + to_text +"> "
+    encodedLinkString += ">>"
+    
+    return encodedLinkString
