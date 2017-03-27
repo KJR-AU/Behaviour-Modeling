@@ -100,6 +100,9 @@ class GraphElem(FLStub):
         self.type = None
 
     @property
+    def parent(self): return self.Attributes['parent']
+
+    @property
     def isEdge(self): return isinstance(self, VertexElem)
 
     @property
@@ -237,11 +240,17 @@ class Document(GraphElem):
         utils.debug("modifyAttribute name= %r, value= %r" % (name, value))
 
         for e in listOfGraphElem:
-            e.Attributes[name] = value
             if name == 'parent':
+                # special handling for parent attribute
+                # to ensure element is always in parent.children
+                if e.Attributes.has_key(name):
+                    old_parent = e.Attributes[name]
+                    assert isinstance(old_parent, Group)
+                    old_parent.children.remove(e)
                 assert isinstance(value, Group)
                 utils.debug("added %r as child in %r" % (e, value.children))
                 value.children.append(e)
+            e.Attributes[name] = value
 
     @staticmethod
     def connect(fromElem, toElem):
