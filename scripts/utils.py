@@ -188,10 +188,11 @@ def reverse_paths(edges, all_nodes=set()):
 
 def decode_inter_feature_link(linkString):
     decodedLinks = []
-    
-    matchObjects = re.finditer( '<<InterFeatureLink FROM FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> TO FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> >>', linkString)
+    #debug(linkString)
+    matchObjects = re.finditer( r'-- InterFeatureLink from\(feature=\"(.*?)\", scenario=\"(.*?)\", keyword=\"(.*?)\", text=\"(.*?)\"\), to\(feature=\"(.*?)\", scenario=\"(.*?)\", keyword=\"(.*?)\", text=\"(.*?)\"', linkString)
 
     for matchObj in matchObjects:
+        debug
         decodedLink = {
             'from_feature': matchObj.group(1),
             'from_scenario': matchObj.group(2),
@@ -202,21 +203,22 @@ def decode_inter_feature_link(linkString):
             'to_keyword': matchObj.group(7),
             'to_text': matchObj.group(8)
         }
+        #debug(str(decodedLink))
         decodedLinks.append(decodedLink)
     return decodedLinks
 
 def encode_inter_feature_link(from_feature, from_scenario, from_keyword, from_text, to_feature, to_scenario, to_keyword, to_text):
-    encodedLinkString = "<<InterFeatureLink "
-    encodedLinkString += "FROM "
-    encodedLinkString += "FEATURE" + "<" + from_feature +"> "
-    encodedLinkString += "SCENARIO" + "<" + from_scenario +"> "
-    encodedLinkString += "KEYWORD" + "<" + from_keyword +"> "
-    encodedLinkString += "TEXT" + "<" + from_text +"> "
-    encodedLinkString += "TO "
-    encodedLinkString += "FEATURE" + "<" + to_feature +"> "
-    encodedLinkString += "SCENARIO" + "<" + to_scenario +"> "
-    encodedLinkString += "KEYWORD" + "<" + to_keyword +"> "
-    encodedLinkString += "TEXT" + "<" + to_text +"> "
-    encodedLinkString += ">>"
+    encodedLinkString = "-- InterFeatureLink "
+    encodedLinkString += "from("
+    encodedLinkString += "feature=\"" + from_feature + "\", "
+    encodedLinkString += "scenario=\"" + from_scenario + "\", "
+    encodedLinkString += "keyword=\"" + from_keyword + "\", "
+    encodedLinkString += "text=\"" + from_text +"\""
+    encodedLinkString += "), to("
+    encodedLinkString += "feature=\"" + to_feature + "\", "
+    encodedLinkString += "scenario=\"" + to_scenario + "\", "
+    encodedLinkString += "keyword=\"" + to_keyword + "\", "
+    encodedLinkString += "text=\"" + to_text + "\""
+    encodedLinkString += ") --"
     
     return encodedLinkString

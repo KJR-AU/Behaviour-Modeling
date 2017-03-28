@@ -1,7 +1,7 @@
 
 Feature: M-Feature
-  <<InterFeatureLink FROM FEATURE<C-Feature> SCENARIO<C-S1> KEYWORD<Then > TEXT<C-T2> TO FEATURE<M-Feature> SCENARIO<M-S2> KEYWORD<Given > TEXT<M-G2> >>
-  <<InterFeatureLink FROM FEATURE<C-Feature> SCENARIO<C-S2> KEYWORD<Then > TEXT<C-T1> TO FEATURE<M-Feature> SCENARIO<M-S1> KEYWORD<Given > TEXT<M-G1> >>
+  -- InterFeatureLink from(feature="C-Feature", scenario="C-S1", keyword="Then ", text="C-T2"), to(feature="M-Feature", scenario="M-S2", keyword="Given ", text="M-G2") --
+  -- InterFeatureLink from(feature="C-Feature", scenario="C-S2", keyword="Then ", text="C-T1"), to(feature="M-Feature", scenario="M-S1", keyword="Given ", text="M-G1") --
   @Test
   Scenario: M-S1
     Given M-G1

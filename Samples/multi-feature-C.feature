@@ -1,6 +1,7 @@
 
 Feature: C-Feature
-
+  -- InterFeatureLink from(feature="C-Feature", scenario="C-S1", keyword="Then ", text=" C-T2"), to(feature="M-Feature", scenario="M-S2", keyword="Given ", text="M-G2") --
+  -- InterFeatureLink from(feature="C-Feature", scenario="C-S2", keyword="Then ", text=" C-T1"), to(feature="M-Feature", scenario="M-S1", keyword="Given ", text="M-G1") --
   @Test2
   Scenario: C-S1
     Given C-G2
