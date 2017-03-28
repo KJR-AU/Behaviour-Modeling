@@ -187,11 +187,11 @@ def reverse_paths(edges, all_nodes=set()):
     return rev
 
 def decode_inter_feature_link(linkString):
-    decodedLink = {}
+    decodedLinks = []
     
-    matchObj = re.search( '<<InterFeatureLink FROM FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> TO FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> >>', linkString)
+    matchObjects = re.finditer( '<<InterFeatureLink FROM FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> TO FEATURE<(.*?)> SCENARIO<(.*?)> KEYWORD<(.*?)> TEXT<(.*?)> >>', linkString)
 
-    if matchObj:
+    for matchObj in matchObjects:
         decodedLink = {
             'from_feature': matchObj.group(1),
             'from_scenario': matchObj.group(2),
@@ -202,7 +202,8 @@ def decode_inter_feature_link(linkString):
             'to_keyword': matchObj.group(7),
             'to_text': matchObj.group(8)
         }
-    return decodedLink
+        decodedLinks.append(decodedLink)
+    return decodedLinks
 
 def encode_inter_feature_link(from_feature, from_scenario, from_keyword, from_text, to_feature, to_scenario, to_keyword, to_text):
     encodedLinkString = "<<InterFeatureLink "

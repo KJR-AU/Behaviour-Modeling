@@ -97,9 +97,7 @@ for key, value in feature['feature'].items():
         newFeature.title = value
     elif key == 'description':
         # a comment - if it can be decoded it is an inter-feature link, save for recreation
-        decoded = utils.decode_inter_feature_link(value)
-        if decoded:
-            interFeatureLinks.append(decoded)
+        interFeatureLinks = utils.decode_inter_feature_link(value)
     elif key == 'children':
         #utils.debug(value)
         for child in value:
@@ -178,6 +176,7 @@ for elem in document.all:
     
 # recreate inter-feature link provided both features exist
 for link in interFeatureLinks:
+    utils.debug("InterFeatureLink: " + str(link))
     src = {}
     tgt = {}
     for entity in catalogue:
