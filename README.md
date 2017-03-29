@@ -35,13 +35,14 @@ May support other visualisation libraries in future (e.g. open source DOT graph 
 Tested with:
 - Flying Logic 3.0.6
   * Import this project's "Behaviour-Modeling.xlogic-d" domain.
-- Python 2.7.6
   * 'gherkin-official' package 
   
 Development also requires:
+- Python 2.7.6 (or Jython 2.7.0 (needed for some tests))
   * 'behave' package for running tests.
   * 'pprint' package for formatting debug messages.
-  
+
+
 ## References
 
 - [Scripting Guide for Flying Logic (PDF)](http://flyinglogic.com/docs/Flying%20Logic%20Scripting%20Guide.pdf)

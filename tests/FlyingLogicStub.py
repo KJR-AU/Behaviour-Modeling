@@ -16,7 +16,7 @@
 import utils
 import random
 
-__all__ = ["FLStub", "Document", "Color"]
+__all__ = ["FLStub", "Document", "Color", "Application"]
 
 
 class FLStub(object):
@@ -61,6 +61,11 @@ class FLStub(object):
         self.stub_properties[key] = value
 
     def __getattr__(self, name):
+
+        # jython implementation of dir() uses these
+        if name in ("__methods__", "__members__"):
+            raise AttributeError()
+
         if name in self.stub_properties:
             return self.stub_properties[name]
 
@@ -79,6 +84,100 @@ class FLStub(object):
         return _missing_function
 
 
+class TextEditor(FLStub):
+    _text = None
+
+    def __init__(self):
+        super(TextEditor, self).__init__()
+        self._text = ""
+
+    @property
+    def text(self):
+        return "<html>" + self._text + "</html>"
+
+    @property
+    def plainText(self):
+        return self._text
+
+    def insert(self, text, attributes):
+        self._text += text
+
+    def flush(self):
+        pass
+
+
+class Application(FLStub):
+    WRITING_BALLOON_SHOUT = "WRITING_BALLOON_SHOUT"
+
+    def request(self, title_or_message, message_or_labels, labels_or_none=None):
+        '''
+        request( message, labels )
+        request( title = "Request", message, labels )
+            displays a request dialog with title (default "Request"( to the user to answer a question
+            by making a selection among a set of buttons with labels (a tuple).
+
+            Returns an integer matching the index of the label in the tuple.
+
+            Note: the message can be a string or a Java Component object,
+            allowing for the creation of a more complicated dialog
+        '''
+
+        if labels_or_none is None:
+            # only passed message and labels
+            title = "Request"
+            message = title_or_message
+            labels = message_or_labels
+        else:
+            # passed all three
+            title = title_or_message
+            message = message_or_labels
+            labels = labels_or_none
+
+        # if no response is defined, try "Cancel" button
+        if not ("stub_request_response" in self.stub_method_responses and self.stub_request_response.has_key(title)):
+            try:
+                return labels.index("Cancel")
+            except ValueError:
+                # FIXME: don't know what FL does when user closes without selecting an button
+                return -1
+
+        if isinstance(message, str):
+            # simple string message with custom buttons,
+            # response based on button
+            return self.stub_request_response[title]
+
+        try:
+            from javax.swing import Box, BoxLayout, JLabel, JCheckBox, JComboBox, JTextField
+        except ImportError as e:
+            assert False, "WARNING: Jython not present."
+
+        # TODO: This assumes a simple grid lay out of 'rows' each containing:
+        #  |  Label:  | Control |
+        dialog_responses = self.stub_request_response[title]
+        assert (isinstance(message, Box))
+        for row in message.getComponents():
+            assert (isinstance(row, Box))
+            fields = row.getComponents()
+
+            assert (2 == len(fields))
+            assert (isinstance(fields[0], JLabel))
+            label = fields[0].getText().strip()
+            value = dialog_responses[label]
+
+            if (isinstance(fields[1], JTextField)):
+                fields[1].setText(value)
+            elif (isinstance(fields[1], JComboBox)):
+                fields[1].setSelectedItem(value)
+            else:
+                raise NotImplementedError("Unknown type" + fields[1].__class__)
+
+        try:
+            # return the desired response (default OK)
+            return labels.index(dialog_responses['Option'])
+        except ValueError:
+            return -1
+
+
 class Color(FLStub):
     GREEN = 'green'
 
@@ -87,6 +186,7 @@ class Color(FLStub):
 class GraphElem(FLStub):
     # static
     _EIDCounter = 0
+    _annotationEditor = None
 
     def __init__(self):
         super(GraphElem, self).__init__()
@@ -98,6 +198,7 @@ class GraphElem(FLStub):
         self.links = []
         self.title = ""
         self.type = None
+        self._annotationEditor = TextEditor()
 
     @property
     def parent(self): return self.Attributes['parent']
@@ -110,6 +211,9 @@ class GraphElem(FLStub):
 
     @property
     def isEntity(self): return True
+
+    @property
+    def annotationEditor(self): return self._annotationEditor
 
     def __str__(self):
         return "GraphElem(%i): %r" % (self.eid, self.title)
@@ -167,8 +271,6 @@ class Document(GraphElem):
         # Flying Logic does not guarantee the order of elements
         # so the stub can't either
         random.shuffle(results)
-
-        utils.debug("Returning document.all = ", pprint=results)
         return results
 
     def newGroup(self, children):
@@ -272,3 +374,11 @@ class Document(GraphElem):
         :return:
         """
         self.selection = []
+
+    @property
+    def hasSelection(self):
+        """True if any elements in the graph are selected, otherwise False (read only)"""
+        return len(self.selection) > 0
+
+    def getSymbolByName(self, name):
+        return name

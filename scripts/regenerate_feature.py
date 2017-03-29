@@ -24,15 +24,16 @@ if reload_needed:
     reload(utils)
 # END COMMON BLOCK
 
+utils._DEBUG = False
 
 document.clearSelection()
 
 
 def extract_tags(group_element):
-    #utils.debug("Extracting Tags from ", pprint=group_element.user)
+    utils.debug("Extracting Tags from ", pprint=group_element.user)
     try:
         tags = []
-        if group_element.user["tags"] is not None:
+        if (group_element.user["tags"] is not None and not group_element.user["tags"] == ""):
             for t in group_element.user["tags"].split(","):
                 tags.append({'location': {'column': 0, 'line': 0},
                              'name': t,
@@ -63,6 +64,7 @@ for elem in document.all:
                  'tags': extract_tags(elem),
                  'location': {'column': 0, 'line': 0},
                  'name': elem.title,
+                 'description': elem.annotationEditor.plainText,
                  'children': []}
             for c in elem.children:
                 x['children'].append(c.eid)
@@ -73,8 +75,11 @@ for elem in document.all:
                  'location': {'column': 0, 'line': 0},
                  'steps': [],
                  'keyword': elem.user["type"],
+                 'description': elem.annotationEditor.plainText,
                  'name': ''
                  }
+
+            # Background has generic title and does not support tags.
             if elem.user["type"] != "Background":
                 x['name'] = elem.title
                 x['tags'] = extract_tags(elem)
@@ -93,7 +98,7 @@ for elem in document.all:
         else:
             utils.debug("Unknown Edge")
     elif elem.isEntity:
-        #utils.debug(elem, elem.eid, elem.title, elem.isEdge, elem.user)
+        # utils.debug(elem, elem.eid, elem.title, elem.isEdge, elem.user)
         x = {'type': 'Step',
              'location': {'column': 0, 'line': 0},
              'keyword': elem.user["keyword"],
@@ -128,8 +133,8 @@ for selectedFeature in features:
 
     selectedFeature["children"] = sections_in_order
 
-    #utils.debug("elements", pprint=elements)
-    #utils.debug("edges", pprint=edges)
+    # utils.debug("elements", pprint=elements)
+    # utils.debug("edges", pprint=edges)
 
     # Now for each section take there nodes and sort them.
     sorted_nodes = utils.nodes_by_path(edges)
@@ -154,9 +159,9 @@ try:
 except KeyError:
     pass
 
-#utils.debug(pprint=featureDoc)
+utils.debug("featureDoc is ", pprint=featureDoc)
 
 featureFileName = Application.askForFile(Application.lastAskDirectory, True)
 utils.write_gherkin_to_file(featureFileName, featureDoc)
-#utils.debug("Done")
+# utils.debug("Done")
 Application.alert("Feature file updated")

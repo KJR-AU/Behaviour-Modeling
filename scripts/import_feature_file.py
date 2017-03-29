@@ -77,7 +77,8 @@ document.modifyUserAttribute([newFeature], "type", 'Feature')
 newFeature.color = Color.GREEN
 capture_tags(newFeature, feature['feature'])
 
-#utils.debug("Feature File AST as produced by parser", pprint=feature)
+utils._DEBUG = False
+utils.debug("Feature File AST as produced by parser", pprint=feature)
 
 interFeatureLinks = []
 
@@ -92,15 +93,22 @@ for key, value in feature['feature'].items():
     first_in_scenario = False
     last_background_node = None
 
-    #utils.debug(key, value, '\n')
     if key == 'name':
         newFeature.title = value
     elif key == 'description':
-        # a comment - if it can be decoded it is an inter-feature link, save for recreation
+        # preserve comment
+        newFeature.annotationEditor.insert(value, {})
+
+        # if there are risks render the balloon
+        if len(utils.decode_risks(value)) > 0:
+            newFeature.symbol = document.getSymbolByName(Application.WRITING_BALLOON_SHOUT)
+
+        # if it has inter-feature link, save for later re-creation
         interFeatureLinks = utils.decode_inter_feature_link(value)
     elif key == 'children':
-        #utils.debug(value)
         for child in value:
+
+            utils.debug(key, value, '\n')
             if child['type'] == 'Background':
                 #utils.debug('Starting', child['type'])
                 in_background = True
@@ -109,6 +117,7 @@ for key, value in feature['feature'].items():
                 document.modifyAttribute([newBackground], "parent", newFeature)
                 set_user_attributes(newBackground, child)
                 currentBackground = newBackground
+                currentGroup = newBackground
             elif child['type'] == 'Scenario' or child['type'] == 'ScenarioOutline':
                 #utils.debug('Starting', child['type'], child['name'])
                 in_background = False
@@ -117,10 +126,19 @@ for key, value in feature['feature'].items():
                 newScenario = document.newGroup(None)[0]
                 newScenario.title = child['name']
                 currentScenario = newScenario
+                currentGroup = newScenario
                 currentNode = None
                 document.modifyAttribute([newScenario], "parent", newFeature)
                 set_user_attributes(newScenario, child)
                 capture_tags(newScenario, child)
+
+            # preserve comment and risk balloon
+            if child.has_key('description'):
+                currentGroup.annotationEditor.insert(child['description'], {})
+                if len(utils.decode_risks(child['description'])) > 0:
+                    currentGroup.symbol = document.getSymbolByName(Application.WRITING_BALLOON_SHOUT)
+
+
 
             for step in child['steps']:
                 #utils.debug("starting step", step['keyword'])

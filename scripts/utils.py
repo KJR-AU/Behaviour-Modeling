@@ -61,14 +61,21 @@ def write_gherkin_to_file(feature_file_name, feature_doc, indent_with="  "):
                 file_handle.write("\n\n")
             first = False
             indent = indent_with * 0
+
+            # Comments above Tags
+            if len(feature_doc["comments"]) > 0:
+                file_handle.write(indent + ("\n" + indent).join(feature_doc["comments"]))
+
+            # Tags above "Feature:"
             if "tags" in selected_feature:
                 for t in selected_feature["tags"]:
                     file_handle.write(indent + t["name"] + "\n")
             file_handle.write(indent + selected_feature["keyword"] + ": " + selected_feature["name"] + "\n")
 
+            # Description inside Feature
             indent = indent_with * 1
-            if len(feature_doc["comments"]) > 0:
-                file_handle.write(indent + ("\n" + indent).join(feature_doc["comments"]))
+            if len(selected_feature["description"]) > 0:
+                file_handle.write(selected_feature["description"] + "\n")
 
             # Background is always the first child
             for sect in selected_feature["children"]:
@@ -83,7 +90,11 @@ def write_gherkin_to_file(feature_file_name, feature_doc, indent_with="  "):
                             file_handle.write(indent + t["name"] + "\n")
                     file_handle.write(indent + sect["keyword"] + ": " + sect["name"] + "\n")
 
+                # Description inside Scenario
                 indent = indent_with * 2
+                if len(sect["description"]) > 0:
+                    file_handle.write(sect["description"] + "\n")
+
                 for step in sect["steps"]:
                     file_handle.write(indent + step["keyword"] + step["text"] + "\n")
 
@@ -186,13 +197,34 @@ def reverse_paths(edges, all_nodes=set()):
     # print(pformat(edges),"=>",pformat(rev))
     return rev
 
+
+def decode_risks(inputText):
+    decodedRisks = []
+    matchObjects = re.finditer(r'Risk: \[(.*?) | Type: (.*?) | Likelihood: (.*?) | Severity: (.*?)\]', inputText)
+    for matchObj in matchObjects:
+        decodedRisks.append({
+            'Risk': matchObj.group(1),
+            'Type': matchObj.group(2),
+            'Likelihood': matchObj.group(3),
+            'Severity': matchObj.group(4)
+        })
+    return decodedRisks
+
+
+def encode_risk(risk):
+    return u'Risk: [%s | Type: %s | Likelihood: %s | Severity: %s]' % (
+        risk['Risk'],
+        risk['Type'],
+        risk['Likelihood'],
+        risk['Severity']
+    )
+
+
 def decode_inter_feature_link(linkString):
     decodedLinks = []
-    #debug(linkString)
     matchObjects = re.finditer( r'-- InterFeatureLink from\(feature=\"(.*?)\", scenario=\"(.*?)\", keyword=\"(.*?)\", text=\"(.*?)\"\), to\(feature=\"(.*?)\", scenario=\"(.*?)\", keyword=\"(.*?)\", text=\"(.*?)\"', linkString)
 
     for matchObj in matchObjects:
-        debug
         decodedLink = {
             'from_feature': matchObj.group(1),
             'from_scenario': matchObj.group(2),
@@ -203,7 +235,6 @@ def decode_inter_feature_link(linkString):
             'to_keyword': matchObj.group(7),
             'to_text': matchObj.group(8)
         }
-        #debug(str(decodedLink))
         decodedLinks.append(decodedLink)
     return decodedLinks
 
